@@ -1,0 +1,15 @@
+
+---
+
+## 📦 `requirements.txt`
+
+```txt
+torch
+transformers
+shap
+scikit-learn
+numpy
+reportlab
+streamlit
+
+```
