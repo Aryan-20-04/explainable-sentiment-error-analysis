@@ -6,6 +6,8 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassifica
 from sklearn.metrics import accuracy_score
 import re
 from pdf_reporter import generate_error_report
+import json
+
 # ---------------- CONFIG ----------------
 DATA_DIR = "data/cleaned_reviews"   # change if needed
 SAMPLE_SIZE = 500           # debug-safe size
@@ -55,7 +57,7 @@ data = load_imdb_samples(DATA_DIR, SAMPLE_SIZE)
 
 NEGATION_WORDS = {"not", "never", "no", "hardly", "scarcely", "barely", "n't"}
 CONTRAST_WORDS = {"but", "however", "although", "though", "yet", "still"}
-SARCASM_PATTERNS = {r"Yeah, right", r"Sure, because", r"As if", r"Just what I needed"}
+SARCASM_PATTERNS = {r"yeah, right", r"sure, because", r"as if", r"just what i needed"}
 
 def categorize_error(text):
     text_lower = text.lower()
@@ -126,9 +128,25 @@ for i, (text, true_label, pred_label, scores, error_type) in enumerate(misclassi
         true_label = true_label,
         pred_label = pred_label,
         confidence = scores,
-        error_type = categorize_error(text),
+        error_type = error_type,
         output_dir = "reports"
     )
     print(f"Generated report for misclassified sample {i+1}: {pdf_path}")
+
+os.makedirs("analysis", exist_ok=True)
+meta = []
+for i, (text, true_label, pred_label, scores, error_type) in enumerate(misclassified):
+    meta.append({
+        "id": i+1,
+        "text": text,
+        "true_label": "POSITIVE" if true_label == 1 else "NEGATIVE",
+        "pred_label": "POSITIVE" if pred_label == 1 else "NEGATIVE",
+        "confidence": scores,
+        "error_type": error_type,
+        "pdf_path": f"reports/error_report_{i+1}.pdf"
+    })
+    
+with open("analysis/misclassified_meta.json", "w", encoding="utf-8") as f:
+    json.dump(meta, f, indent=2)
 
 print("\nDone.")
