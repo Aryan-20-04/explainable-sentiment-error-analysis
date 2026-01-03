@@ -1,15 +1,8 @@
-
----
-
-## 📦 `requirements.txt`
-
-```txt
 torch
 transformers
 shap
 scikit-learn
 numpy
+matplotlib
 reportlab
 streamlit
-
-```
